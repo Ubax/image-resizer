@@ -1,0 +1,14 @@
+{
+  "name": "resizer",
+  "version": "0.1.0",
+  "description": "An application for fast images resizing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jakub Tkacz",
+  "license": "MIT",
+  "dependencies": {
+    "sharp": "^0.28.1"
+  }
+}
