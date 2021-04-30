@@ -1,10 +1,10 @@
 const fs = require("fs");
 const sharp = require("sharp");
 
-const imageFormats = ["jpg", "jpeg", "png", "gif"];
+const imageFormats = ["jpg", "jpeg", "png", "gif", "webp"];
 const defaultSizes = [
-  { size: [400, 300], suffix: "mid" },
   { size: [200, 150], suffix: "mini" },
+  { size: [400, 300], suffix: "mid" },
   { size: [800, 600], suffix: "large" },
 ];
 
@@ -14,16 +14,19 @@ const getExtension = (fileName) =>
 const removeExtension = (fileName) =>
   fileName.split(".").slice(0, -1).join(".");
 
-const resizeImageToSizes = (fileName, sizes, outPrefix = '') => {
-  sizes.forEach((size) => {
-    const newFileName = `${outPrefix}${removeExtension(fileName)}-${
-      size.suffix
-    }.${getExtension(fileName)}`;
-    sharp(fileName).resize(size[0], size[1]).toFile(newFileName);
-  });
+const resizeImageToSizes = async (fileName, sizes, outPrefix = "") => {
+  await Promise.all(
+    sizes.map(async (sizeDefinition) => {
+      const { size, suffix } = sizeDefinition;
+      const newFileName = `${outPrefix}${removeExtension(fileName)}.${suffix}`;
+      const resized = sharp(fileName).resize(size[0], size[1]);
+      await resized.webp().toFile(`${newFileName}.webp`);
+      await resized.jpeg().toFile(`${newFileName}.jpg`);
+    })
+  );
 };
 
-const run = () => {
+const run = async () => {
   let files = [];
   try {
     const data = fs.readFileSync("./list.json");
@@ -46,9 +49,20 @@ const run = () => {
     return;
   }
 
-  files.forEach(fileName=>{
-      resizeImageToSizes(fileName, defaultSizes, 'out/')
-  })
+  try {
+    fs.mkdirSync("out");
+    console.log("[INFO] Created new directory ./out");
+  } catch (e) {
+    if (e.code !== "EEXIST") {
+      throw e;
+    }
+    console.log("[INFO] out directory already exists");
+  }
+
+  files.map((fileName) => {
+    resizeImageToSizes(fileName, defaultSizes, "out/");
+  });
+  await Promise.all(files);
 };
 
 run();
