@@ -1,12 +1,12 @@
 const fs = require("fs");
 const sharp = require("sharp");
-const path = require('path');
+const path = require("path");
 
 const imageFormats = ["jpg", "jpeg", "png", "gif", "webp"];
 const defaultSizes = [
   { size: [200, 150], suffix: "mini" },
   { size: [400, 300], suffix: "mid" },
-  { size: [800, 600], suffix: "large" },
+  { size: [800], suffix: "large" },
 ];
 
 const getExtension = (fileName) =>
@@ -17,9 +17,9 @@ const removeExtension = (fileName) =>
 
 const createDirectoryIfNotExist = (dirname) => {
   if (!fs.existsSync(dirname)) {
-    fs.mkdirSync(dirname)
+    fs.mkdirSync(dirname);
   }
-}
+};
 
 const resizeImageToSizes = async (fileName, sizes, outPrefix = "") => {
   await Promise.all(
@@ -27,8 +27,8 @@ const resizeImageToSizes = async (fileName, sizes, outPrefix = "") => {
       const { size, suffix } = sizeDefinition;
       const newFileName = `${outPrefix}${removeExtension(fileName)}.${suffix}`;
       const resized = sharp(fileName).resize(size[0], size[1]);
-      const directory = path.dirname(`${newFileName}.webp`)
-      createDirectoryIfNotExist(directory)
+      const directory = path.dirname(`${newFileName}.webp`);
+      createDirectoryIfNotExist(directory);
       await resized.webp().toFile(`${newFileName}.webp`);
       await resized.jpeg().toFile(`${newFileName}.jpg`);
     })
@@ -42,7 +42,7 @@ const run = async () => {
     if (data) {
       files = JSON.parse(data);
     }
-  } catch (e) { }
+  } catch (e) {}
 
   if (files.length === 0) {
     try {
@@ -50,7 +50,7 @@ const run = async () => {
       files = dir.filter((fileName) =>
         imageFormats.includes(getExtension(fileName))
       );
-    } catch (e) { }
+    } catch (e) {}
   }
 
   if (files.length === 0) {
@@ -59,7 +59,7 @@ const run = async () => {
   }
 
   try {
-    createDirectoryIfNotExist("out")
+    createDirectoryIfNotExist("out");
     console.log("[INFO] Created new directory ./out");
   } catch (e) {
     if (e.code !== "EEXIST") {
